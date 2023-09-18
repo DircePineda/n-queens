@@ -1,0 +1,106 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import multiprocessing
+
+class NQueens:
+    def __init__(self, number_pieces=None, number_spaces=None, row=None, column=None, diagonal=None):
+        self.n = number_pieces
+        self.s = number_spaces
+        self.i = row
+        self.j = column
+        self.k = diagonal
+
+        # If any argument is None, set default values
+        if self.n is None:
+            self.n = 8  # Default value for number_pieces
+        if self.s is None:
+            self.s = 8  # Default value for number_spaces
+        if self.i is None:
+            self.i = 0   # Default value for row
+        if self.j is None:
+            self.j = 0   # Default value for column
+        if self.k is None:
+            self.k = 0   # Default value for diagonal
+
+        # Restrictions of spaces
+        self.restriction_corners = self.s - 4
+        self.spaces_occupied = self.s - self.n
+
+        self.restriction_row = self.i - self.n
+        self.restriction_column = self.j - self.n
+        self.restriction_diagonal = self.k - self.n
+
+        self.total_space_row = self.s - (self.i - self.n)
+        self.total_space_column = self.s - (self.j - self.n)
+        self.total_space_diagonal = self.s - (self.k - self.n)
+
+        # Initialize an empty board
+        self.board = np.zeros((self.s, self.s), dtype=int)
+
+    def calculate_limit_movement(self):
+        # Calculate the limit movement based on your formula
+        limit_movement = self.s - (self.i - self.n) + self.s - (self.j - self.n) + self.s - (self.k - self.n)
+        return limit_movement
+
+    def is_safe(self, row, col):
+        # Check if it's safe to place a queen at the given row and column
+        for i in range(col):
+            if self.board[row][i] == 1:
+                return False
+
+        for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+            if self.board[i][j] == 1:
+                return False
+
+        for i, j in zip(range(row, len(self.board), 1), range(col, -1, -1)):
+            if self.board[i][j] == 1:
+                return False
+
+        return True
+
+    def solve(self, col):
+        # Base case: All queens are placed successfully
+        if col == self.n:
+            return True
+
+        for i in range(self.s):
+            if self.is_safe(i, col):
+                self.board[i][col] = 1  # Place a queen
+                if self.solve(col + 1):  # Recursive call for the next column
+                    return True
+                self.board[i][col] = 0  # If placing the queen doesn't lead to a solution, backtrack
+
+        return False
+
+    def solve_n_queens(self):
+        if self.solve(0) is False:
+            print("No solution exists")
+            return False
+
+        self.plot_solution()
+        return True
+
+    def plot_solution(self):
+        plt.figure(figsize=(8, 8))
+        colors = ['white', 'black']
+        for i in range(len(self.board)):
+            for j in range(len(self.board)):
+                color = colors[(i + j) % 2]  # Alternating colors for squares
+                plt.fill_between([j, j + 1], len(self.board) - i, len(self.board) - i - 1, color=color)
+                if self.board[i][j] == 1:
+                    plt.text(j + 0.5, i + 0.5, '♛', color='red', ha='center', va='center', fontsize=20)
+
+        plt.title("N-Queens Solution")
+        plt.xlim(0, len(self.board))
+        plt.ylim(0, len(self.board))
+        plt.gca().invert_yaxis()
+        plt.axis('off')
+        plt.show()
+
+# Parameters
+board_size = 20
+n_queens = 20
+
+# Create board with 20 queens
+queens_creation = NQueens(n_queens, board_size, 2, 3, 5)
+queens_creation.solve_n_queens()
