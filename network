@@ -1,0 +1,168 @@
+# FIRST NETWORK VISUALIZATION
+import numpy as np
+
+class NQueens:
+    def __init__(self, number_pieces=None, number_spaces=None, row=None, column=None, diagonal=None):
+        self.n = number_pieces
+        self.s = number_spaces
+        self.i = row
+        self.j = column
+        self.k = diagonal
+        
+        # Calculate the limit positions
+        self.limit_positions = self.calculate_limit_positions()
+
+        # Initialize an empty board
+        self.board = np.zeros((self.s, self.s), dtype=int)
+
+        # Mark limit positions as -1
+        for i, j in self.limit_positions:
+            self.board[i][j] = -1
+
+    def calculate_limit_positions(self):
+       # Calculate and return a list of limit positions
+        limit_positions = []
+
+        # Add restrictions for the corners (if applicable)
+        if self.s >= 4:
+            limit_positions.extend([(0, 0), (0, self.s - 1), (self.s - 1, 0), (self.s - 1, self.s - 1)])
+
+        # Add restrictions for the row
+        limit_positions.extend([(self.i, j) for j in range(self.s)])
+
+        # Add restrictions for the column
+        limit_positions.extend([(i, self.j) for i in range(self.s)])
+
+        # Add restrictions for the anti-diagonal
+        limit_positions.extend([(self.i - i, self.j - i) for i in range(min(self.n, self.i + 1, self.j + 1))])
+
+        # Add restrictions for the diagonal
+        limit_positions.extend([(self.i - i, self.j + i) for i in range(min(self.n, self.i + 1, self.s - self.j))])
+        limit_positions.extend([(self.i + i, self.j - i) for i in range(min(self.n, self.s - self.i, self.j + 1))])
+        limit_positions.extend([(self.i + i, self.j + i) for i in range(min(self.n, self.s - self.i, self.s - self.j))])
+
+        # Remove duplicates and out-of-bounds positions
+        limit_positions = [(i, j) for i, j in limit_positions if 0 <= i < self.s and 0 <= j < self.s]
+        return list(set(limit_positions))
+
+# Example usage:
+n_queens_instance = NQueens(number_pieces=8, number_spaces=8, row=2, column=3, diagonal=5)
+board_with_limit_positions = n_queens_instance.board
+
+# Printing the board to visualize limit positions
+board_with_limit_positions
+
+# Define neural network model
+# Basic feedforward neural network by TensorFlow/Keras
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+# Define a simple neural network model
+def create_model():
+    model = Sequential([
+        Dense(64, activation='relu', input_shape=(input_dim,)),
+        Dense(32, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
+# Define the input dimension based on your feature set
+input_dim = 64
+
+# Create a function that takes a position as input
+# Apply neural network model & returns if it meets the requirements or not
+def analyze_position(position):
+    # Preprocess the position using the NQueens class
+    n_queens_instance = NQueens(
+        number_pieces=position.number_pieces,
+        number_spaces=position.number_spaces,
+        row=position.row,
+        column=position.column,
+        diagonal=position.diagonal
+    )
+
+    # Get the board with limit positions
+    board_with_limit_positions = n_queens_instance.board
+
+    # Load your data and preprocess it as needed based on the board_with_limit_positions
+    # For example, you can flatten the board and scale the values to match the input dimension
+    features = preprocess(board_with_limit_positions)
+
+    # Create and compile the model
+    model = create_model()
+
+    # Load pre-trained weights if available
+    # model.load_weights('model_weights.h5')
+
+    # Predict whether the position meets the requirements
+    prediction = model.predict(features)
+
+    return prediction[0][0] >= 0.5  # Assuming 0.5 is your threshold for meeting the requirements
+
+# Analyze positions concurrently
+import concurrent.futures
+
+# Create a list of NQueens instances representing the positions to analyze
+positions_to_analyze = [
+    NQueens(number_pieces=8, number_spaces=8, row=2, column=3, diagonal=5),
+    NQueens(number_pieces=8, number_spaces=8, row=3, column=0, diagonal=6),
+    # Add more positions as needed
+]
+
+# Number of concurrent threads (adjust according to your system's capabilities)
+num_threads = 4
+
+# Analyze positions concurrently
+import concurrent.futures
+
+# Create a list of NQueens instances representing the positions to analyze
+positions_to_analyze = [
+    NQueens(number_pieces=8, number_spaces=8, row=2, column=3, diagonal=5),
+    NQueens(number_pieces=8, number_spaces=8, row=3, column=0, diagonal=6),
+    # Add more positions as needed
+]
+
+# Number of concurrent threads (adjust according to your system's capabilities)
+num_threads = 4
+
+# Define the input dimension based on your feature set
+input_dim = 64
+
+# Create a function to analyze positions
+def analyze_position(position):
+    # Preprocess the position using the NQueens class
+    n_queens_instance = NQueens(
+        number_pieces=position.number_pieces,
+        number_spaces=position.number_spaces,
+        row=position.row,
+        column=position.column,
+        diagonal=position.diagonal
+    )
+
+    # Get the board with limit positions
+    board_with_limit_positions = n_queens_instance.board
+
+    # Printing the board to visualize limit positions
+    print("Board Configuration for n={}, s={}, i={}, j={}, k={}".format(
+        position.number_pieces, position.number_spaces, position.row, position.column, position.diagonal))
+    
+    for row in board_with_limit_positions:
+        print(" ".join(["0" if cell == 0 else "-1" for cell in row]))
+
+    # Flatten the board and scale the values to match the input dimension
+    features = board_with_limit_positions.flatten() / position.number_spaces
+
+    # Create and compile the model
+    model = create_model(input_dim)
+
+    # Predict whether the position meets the requirements
+    prediction = model.predict(features.reshape(1, -1))
+
+    return prediction[0][0] >= 0.5  # Assuming 0.5 is your threshold for meeting the requirements
+
+# Analyze positions concurrently
+with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+    results = list(executor.map(analyze_position, positions_to_analyze))
+
