@@ -1,0 +1,6 @@
+# Example usage:
+n_queens_instance = NQueens(number_pieces=8, number_spaces=8, row=2, column=3, diagonal=5)
+board_with_limit_positions = n_queens_instance.board
+
+# Printing the board to visualize limit positions
+board_with_limit_positions
