@@ -1,0 +1,20 @@
+def results_to_array(results, n_queens_instance):
+    board_with_limit_positions = n_queens_instance.board
+    rows, cols = board_with_limit_positions.shape
+    result_array = np.zeros((rows, cols), dtype=int)
+
+    for i, result in enumerate(results):
+        row = i // cols
+        col = i % cols
+        if result:
+            result_array[row][col] = -1
+        else:
+            result_array[row][col] = 0
+
+    return result_array
+
+# Convert the results to the desired array
+result_array = results_to_array(results, n_queens_instance)
+
+# Print the result_array
+print(result_array)
